@@ -259,11 +259,22 @@ const MapPage = () => {
             ))}
           </div>
         </div>
-        <input type="file" accept=".csv" onChange={handleFileUpload} />
+        <div className="summary-container">
+          <h5>Data Summary</h5>
+          <ul>
+            <li>Species: 5</li>
+            <li>Countries: 5</li>
+            <li>Methods: 5</li>
+            <li>Species: 4</li>
+            <li>New Species: 4</li>
+          </ul>
+        </div>
+        <div></div>
+        {/* <input type="file" accept=".csv" onChange={handleFileUpload} /> */}
         <MapContainer
           center={[0, 0]}
           zoom={2}
-          style={{ height: "600px", width: "100%" }}
+          style={{ height: "400px", width: "100%" }}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

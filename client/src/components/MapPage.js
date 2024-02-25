@@ -9,7 +9,6 @@ import Footer from "./Footer";
 import "leaflet/dist/leaflet.css";
 import "./MapPage.css";
 import Image from "./Image";
-import { scaleLinear } from "d3-scale";
 
 const createColoredMarkerIcon = (color) => {
   const markerHtml = encodeURIComponent(

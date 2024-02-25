@@ -37,52 +37,27 @@ const getRandomColor = () => {
 const MapPage = () => {
   const [data, setData] = useState([]);
   const [speciesList, setSpeciesList] = useState([]);
-  const [selectedSpecies, setSelectedSpecies] = useState([]);
   const [seasonList, setSeasonList] = useState([]);
-  const [selectedSeasons, setSelectedSeasons] = useState([]);
   const [trapMethodList, setTrapMethodList] = useState([]);
-  const [selectedTrapMethods, setSelectedTrapMethods] = useState([]);
   const [countryList, setCountryList] = useState([]);
+
+  const [selectedSpecies, setSelectedSpecies] = useState([]);
+  const [selectedSeasons, setSelectedSeasons] = useState([]);
+  const [selectedTrapMethods, setSelectedTrapMethods] = useState([]);
   const [selectedCountries, setSelectedCountries] = useState([]);
 
-  useEffect(() => {
-    fetchData();
-    fetchSpeciesList();
-    fetchSeasonList();
-    fetchTrapMethodList();
-    fetchCountryList();
-  }, [
-    selectedSpecies,
-    selectedSeasons,
-    selectedTrapMethods,
-    selectedCountries,
-  ]);
-
-  const fetchData = () => {
-    console.log(
-      "selected few",
-      selectedSeasons,
-      selectedSpecies,
-      selectedTrapMethods,
-      selectedCountries
-    );
+  const fetchData = async () => {
     const url = `http://localhost:5000/api/tsetse_fly_data?species=${selectedSpecies.join(
       ","
     )}&season=${selectedSeasons.join(",")}&method=${selectedTrapMethods.join(
       ","
     )}&country=${selectedCountries.join(",")}`;
-    // fetch(url)
-    // .then(response=>response.json()).then(data=>{
-    //   console.log(data);
-    // })
-    // .catch(error=>{
-    //   console.error(error);
-    // });
 
-    axios
+    await axios
       .get(url)
       .then((response) => {
         setData(response.data);
+        console.log(response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -134,6 +109,14 @@ const MapPage = () => {
       });
   };
 
+  useEffect(() => {
+    fetchData();
+    fetchSpeciesList();
+    fetchSeasonList();
+    fetchTrapMethodList();
+    fetchCountryList();
+  }, []);
+
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
 
@@ -165,9 +148,26 @@ const MapPage = () => {
       });
   };
 
-  const colorScale = scaleLinear()
-    .domain([0, 100]) // Example density range from 0 to 100
-    .range(["blue", "red"]); // Colors from low (blue) to high (red) density
+  const FilterComponent = ({ data }) => {
+    return (
+      <div key={data} className="filter-container">
+        <p className="filter-label">{data}</p>
+        <div className="filter-checkbox">
+          <input
+            type="checkbox"
+            value={data}
+            checked={selectedSpecies.includes(data)}
+            onChange={(e) => {
+              const updatedSpecies = e.target.checked
+                ? [...selectedSpecies, data]
+                : selectedSpecies.filter((item) => item !== data);
+              setSelectedSpecies(updatedSpecies);
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -193,20 +193,7 @@ const MapPage = () => {
           <div>
             <label>Selected Species:</label>
             {speciesList.map((species) => (
-              <label key={species}>
-                <input
-                  type="checkbox"
-                  value={species}
-                  checked={selectedSpecies.includes(species)}
-                  onChange={(e) => {
-                    const updatedSpecies = e.target.checked
-                      ? [...selectedSpecies, species]
-                      : selectedSpecies.filter((item) => item !== species);
-                    setSelectedSpecies(updatedSpecies);
-                  }}
-                />
-                {species}
-              </label>
+              <FilterComponent data={species} />
             ))}
           </div>
           <div>
@@ -226,20 +213,7 @@ const MapPage = () => {
           <div>
             <label>Selected Seasons:</label>
             {seasonList.map((season) => (
-              <label key={season}>
-                <input
-                  type="checkbox"
-                  value={season}
-                  checked={selectedSeasons.includes(season)}
-                  onChange={(e) => {
-                    const updatedSeasons = e.target.checked
-                      ? [...selectedSeasons, season]
-                      : selectedSeasons.filter((item) => item !== season);
-                    setSelectedSeasons(updatedSeasons);
-                  }}
-                />
-                {season}
-              </label>
+              <FilterComponent data={season} />
             ))}
           </div>
           <div>
@@ -259,20 +233,7 @@ const MapPage = () => {
           <div>
             <label>Selected Trap Methods:</label>
             {trapMethodList.map((method) => (
-              <label key={method}>
-                <input
-                  type="checkbox"
-                  value={method}
-                  checked={selectedTrapMethods.includes(method)}
-                  onChange={(e) => {
-                    const updatedMethods = e.target.checked
-                      ? [...selectedTrapMethods, method]
-                      : selectedTrapMethods.filter((item) => item !== method);
-                    setSelectedTrapMethods(updatedMethods);
-                  }}
-                />
-                {method}
-              </label>
+              <FilterComponent data={method} />
             ))}
           </div>
           <div>
@@ -295,22 +256,7 @@ const MapPage = () => {
           <div>
             <label>Selected Countries:</label>
             {countryList.map((country) => (
-              <label key={country.id}>
-                <input
-                  type="checkbox"
-                  value={country.country}
-                  checked={selectedCountries.includes(country.country)}
-                  onChange={(e) => {
-                    const updatedCountries = e.target.checked
-                      ? [...selectedCountries, country.country]
-                      : selectedCountries.filter(
-                          (item) => item !== country.country
-                        );
-                    setSelectedCountries(updatedCountries);
-                  }}
-                />
-                {country.country}
-              </label>
+              <FilterComponent data={country.country} />
             ))}
           </div>
         </div>

@@ -50,3 +50,7 @@
 .filter-checkbox {
   width: 20px;
 }
+
+.file-upload {
+  display: flex;
+}

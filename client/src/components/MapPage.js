@@ -8,7 +8,7 @@ import AboutImg from "../Assets/image7.webp";
 import Footer from "./Footer";
 import "leaflet/dist/leaflet.css";
 import "./MapPage.css";
-import Image from "./FileUpload";
+import { Image, CSVUpload } from "./FileUpload";
 const createColoredMarkerIcon = (color) => {
   const markerHtml = encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" height="50" width="50"><circle cx="50" cy="50" r="40" fill="${color}" /></svg>`
@@ -149,7 +149,10 @@ const MapPage = () => {
               </Marker>
             ))}
           </MapContainer>
-          <Image />
+          <div className="file-upload">
+            <Image />
+            <CSVUpload />
+          </div>
         </div>
       </div>
       <Footer />

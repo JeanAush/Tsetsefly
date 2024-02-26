@@ -22,6 +22,7 @@ const pool = new Pool({
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 // Multer configuration for file upload
 const storage = multer.diskStorage({
@@ -154,56 +155,6 @@ app.post(
   }
 );
 
-// Fetch distinct species
-app.get("/api/species", async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT DISTINCT species FROM tsetse_fly_data"
-    );
-    res.json(result.rows.map((row) => row.species));
-  } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
-  }
-});
-
-// Fetch distinct seasons
-app.get("/api/season", async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT DISTINCT season FROM tsetse_fly_data"
-    );
-    res.json(result.rows.map((row) => row.season));
-  } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
-  }
-});
-
-// Fetch distinct trap methods
-app.get("/api/trap-method", async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT DISTINCT method FROM tsetse_fly_data"
-    );
-    res.json(result.rows.map((row) => row.method));
-  } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
-  }
-});
-
-// Fetch distinct countries
-app.get("/api/country", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT * FROM tsetse_fly_data");
-    res.json(result.rows.map((row) => row));
-  } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
-  }
-});
-
 // Fetch tsetse fly data based on filters
 app.get("/api/tsetse_fly_data", async (req, res) => {
   const { country, species, season, method } = req.query;
@@ -249,42 +200,87 @@ app.get("/api/tsetse_fly_data", async (req, res) => {
 });
 // Upload insect images (up to three)
 // Upload images
-app.post("/api/upload-images", upload.array("images", 3), async (req, res) => {
+app.post("/api/upload-images", upload.single("image"), async (req, res) => {
+  const { name } = req.body; // The species name
+  const imageUrl = `/uploads/${req.file.filename}`; // Assuming you serve static files and uploads directory is accessible
+
   try {
-    const uploadedImages = req.files.map((file) => ({
-      filename: file.originalname,
-      filepath: file.path,
-    }));
+    const updateQuery =
+      "UPDATE tsetse_fly_data SET images = $1 WHERE species = $2";
+    const result = await pool.query(updateQuery, [imageUrl, name]);
 
-    // Save image metadata to the database
-    const insertionPromises = uploadedImages.map((image) =>
-      pool.query(
-        "INSERT INTO insect_images (filename, filepath) VALUES ($1, $2) RETURNING id",
-        [image.filename, image.filepath]
-      )
-    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Species not found." });
+    }
 
-    // Wait for all insertion operations to complete
-    const insertedImageIds = await Promise.all(insertionPromises);
-
-    res.status(200).json(insertedImageIds.map((result) => result.rows[0].id));
+    res.json({ message: "Image uploaded and updated successfully!" });
   } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
+    console.error("Database or file error:", error);
+    res.status(500).json({ message: "Failed to upload image." });
   }
 });
 
 // Fetch uploaded images
-app.get("/api/images", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT * FROM insect_images");
-    const images = result.rows;
-    res.json(images);
-  } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
-  }
-});
+// app.get("/api/images", async (req, res) => {
+//   try {
+//     const result = await pool.query("SELECT * FROM insect_images");
+//     const images = result.rows;
+//     res.json(images);
+//   } catch (error) {
+//     console.error(error);
+//     res.sendStatus(500);
+//   }
+// });
+
+// Fetch distinct species
+// app.get("/api/species", async (req, res) => {
+//   try {
+//     const result = await pool.query(
+//       "SELECT DISTINCT species FROM tsetse_fly_data"
+//     );
+//     res.json(result.rows.map((row) => row.species));
+//   } catch (error) {
+//     console.error(error);
+//     res.sendStatus(500);
+//   }
+// });
+
+// // Fetch distinct seasons
+// app.get("/api/season", async (req, res) => {
+//   try {
+//     const result = await pool.query(
+//       "SELECT DISTINCT season FROM tsetse_fly_data"
+//     );
+//     res.json(result.rows.map((row) => row.season));
+//   } catch (error) {
+//     console.error(error);
+//     res.sendStatus(500);
+//   }
+// });
+
+// Fetch distinct trap methods
+// app.get("/api/trap-method", async (req, res) => {
+//   try {
+//     const result = await pool.query(
+//       "SELECT DISTINCT method FROM tsetse_fly_data"
+//     );
+//     res.json(result.rows.map((row) => row.method));
+//   } catch (error) {
+//     console.error(error);
+//     res.sendStatus(500);
+//   }
+// });
+
+// // Fetch distinct countries
+// app.get("/api/country", async (req, res) => {
+//   try {
+//     const result = await pool.query("SELECT * FROM tsetse_fly_data");
+//     res.json(result.rows.map((row) => row));
+//   } catch (error) {
+//     console.error(error);
+//     res.sendStatus(500);
+//   }
+// });
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

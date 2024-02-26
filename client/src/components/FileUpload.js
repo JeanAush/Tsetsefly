@@ -6,6 +6,8 @@ function Image() {
   const [image, setImage] = useState(null);
   const [name, setName] = useState("");
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
@@ -18,22 +20,38 @@ function Image() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!image) {
-      setError("Please select an image.");
+    if (!image || !name.trim()) {
+      setError("Please select an image and enter the insect name.");
       return;
     }
 
+    setError(null);
+    setLoading(true);
     const formData = new FormData();
     formData.append("image", image);
     formData.append("name", name);
 
     try {
-      const response = await axios.post("/api/upload-images", formData);
+      const response = await axios.post("/api/upload-images", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       console.log("Upload successful:", response.data);
-      // Optionally, you can handle the success response here
+      setSuccessMessage("Image uploaded successfully!");
+      // Reset form
+      setImage(null);
+      setName("");
+      // Reset file input
+      e.target.reset();
     } catch (error) {
-      console.error("Error:", error.response.data);
-      // Optionally, you can handle the error response here
+      console.error(
+        "Error:",
+        error.response ? error.response.data : "Error uploading image"
+      );
+      setError("Failed to upload image. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,8 +66,11 @@ function Image() {
           onChange={handleNameChange}
           placeholder="Enter Insect Name"
         />
-        <button type="submit">Upload</button>
-        {error && <p>{error}</p>}
+        <button type="submit" disabled={loading}>
+          Upload
+        </button>
+        {error && <p className="error">{error}</p>}
+        {successMessage && <p className="success">{successMessage}</p>}
       </form>
     </div>
   );

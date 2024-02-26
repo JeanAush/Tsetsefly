@@ -1,14 +1,25 @@
+.main-container {
+  width: 100%;
+  display: flex;
+  gap: 2;
+}
+
 .map-page-container {
   display: flex;
   justify-content: space-between;
-  padding: 20px;
+  padding: 10px;
+}
+
+.map-container {
+  width: 500px;
+  padding-left: 10px;
 }
 
 .filter-options {
   background-color: #fff;
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 250px;
+  width: 150px;
 }
 
 .filter-options select,
@@ -38,9 +49,4 @@
 
 .filter-checkbox {
   width: 20px;
-}
-
-.summary-container {
-  padding: 20px;
-  width: 500px;
 }

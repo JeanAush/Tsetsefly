@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "./Image.css";
+import "./FileUpload.css";
 
 function Image() {
   const [image, setImage] = useState(null);
@@ -42,7 +42,12 @@ function Image() {
       <h2>Upload Insect Image</h2>
       <form onSubmit={handleSubmit}>
         <input type="file" onChange={handleImageChange} accept="image/*" />
-        <input type="text" value={name} onChange={handleNameChange} placeholder="Enter Insect Name" />
+        <input
+          type="text"
+          value={name}
+          onChange={handleNameChange}
+          placeholder="Enter Insect Name"
+        />
         <button type="submit">Upload</button>
         {error && <p>{error}</p>}
       </form>

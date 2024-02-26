@@ -203,10 +203,14 @@ app.get("/api/tsetse_fly_data", async (req, res) => {
 app.post("/api/upload-images", upload.single("image"), async (req, res) => {
   const { name } = req.body; // The species name
   const imageUrl = `/uploads/${req.file.filename}`; // Assuming you serve static files and uploads directory is accessible
-
+  const findquery = await pool.query(
+    `SELECT * FROM tsetse_fly_data WHERE species='${name}'`
+  );
+  console.log(findquery);
   try {
     const updateQuery =
-      "UPDATE tsetse_fly_data SET images = $1 WHERE species = $2";
+      "UPDATE tsetse_fly_data SET images = $1 WHERE TRIM(species) = TRIM($2)";
+
     const result = await pool.query(updateQuery, [imageUrl, name]);
 
     if (result.rowCount === 0) {

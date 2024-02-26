@@ -32,11 +32,15 @@ function Image() {
     formData.append("name", name);
 
     try {
-      const response = await axios.post("/api/upload-images", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/upload-images",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       console.log("Upload successful:", response.data);
       setSuccessMessage("Image uploaded successfully!");
       // Reset form

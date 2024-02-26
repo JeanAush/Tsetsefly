@@ -70,14 +70,16 @@ const MapPage = () => {
     [...new Set(data.map((item) => item[key]))].sort();
 
   const FilterCheckbox = ({ filterType, option }) => (
-    <label key={option} className="filter-option">
-      <input
-        type="checkbox"
-        value={option}
-        checked={selectedFilters[filterType].includes(option)}
-        onChange={() => handleCheckboxChange(filterType, option)}
-      />
-      {option}
+    <label key={option} className="filter-container">
+      <p className="filter-label">{option}</p>
+      <div className="filter-checkbox">
+        <input
+          type="checkbox"
+          value={option}
+          checked={selectedFilters[filterType].includes(option)}
+          onChange={() => handleCheckboxChange(filterType, option)}
+        />
+      </div>
     </label>
   );
 
@@ -96,6 +98,9 @@ const MapPage = () => {
       <Hero cName="hero-mid" heroImg={AboutImg} title=" Map Page" />
       <div className="map-page-container">
         <div className="filter-options">
+          <div>
+            <label>Filter by:</label>
+          </div>
           {Object.keys(selectedFilters).map((filterType) => (
             <div key={filterType} className="filter-group">
               <p className="filter-label">

@@ -80,27 +80,35 @@ function Image() {
   );
 }
 
-const CSVUpload = ({ fetchData }) => {
+const CSVUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
+    // Reset messages on new file selection
+    setError(null);
+    setSuccessMessage("");
   };
 
-  const handleFormSubmit = (event) => {
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
 
     if (!selectedFile) {
-      console.log("No file selected.");
+      setError("No file selected.");
       return;
     }
 
+    setLoading(true);
     const formData = new FormData();
     formData.append("file", selectedFile);
 
     const token = localStorage.getItem("token");
     if (!token) {
-      console.error("Token not found");
+      setError("Token not found");
+      setLoading(false);
       return;
     }
 
@@ -111,15 +119,21 @@ const CSVUpload = ({ fetchData }) => {
       },
     };
 
-    axios
-      .post("http://localhost:5000/api/upload-csv", formData, config)
-      .then(() => {
-        console.log("CSV uploaded successfully");
-        fetchData(); // Make sure this function is correctly passed as a prop and defined to refresh data
-      })
-      .catch((error) => {
-        console.error("Error uploading CSV:", error);
-      });
+    try {
+      await axios.post(
+        "http://localhost:5000/api/upload-csv",
+        formData,
+        config
+      );
+      setSuccessMessage("CSV uploaded successfully");
+    } catch (error) {
+      setError(
+        "Error uploading CSV: " +
+          (error.response ? error.response.data.message : error.message)
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -127,12 +141,14 @@ const CSVUpload = ({ fetchData }) => {
       <h2>Upload CSV</h2>
       <form onSubmit={handleFormSubmit}>
         <input type="file" accept=".csv" onChange={handleFileChange} />
-        <button type="submit">Upload</button>
+        <button type="submit" disabled={loading}>
+          Upload
+        </button>
+        {error && <p className="error-message">{error}</p>}
+        {successMessage && <p className="success-message">{successMessage}</p>}
       </form>
     </div>
   );
 };
-
-export default CSVUpload;
 
 export { Image, CSVUpload };

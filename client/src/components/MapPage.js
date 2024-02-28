@@ -146,6 +146,12 @@ const MapPage = () => {
                   Season: {entry.season}
                   <br />
                   Method: {entry.method}
+                  {entry.species === "unidentified" && (
+                    <>
+                      <br />
+                      Tagname: {entry.tagname}
+                    </>
+                  )}
                 </Popup>
               </Marker>
             ))}

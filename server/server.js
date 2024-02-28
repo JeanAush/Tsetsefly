@@ -126,7 +126,7 @@ app.post(
           .on("data", async (row) => {
             // Insert data into PostgreSQL database
             const insertionPromise = pool.query(
-              "INSERT INTO tsetse_fly_data (username, species, latitude, longitude, season, country, method) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+              "INSERT INTO tsetse_fly_data (username, species, latitude, longitude, season, country, method, tagname) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
               [
                 username,
                 row.species,
@@ -135,6 +135,7 @@ app.post(
                 row.season,
                 row.country,
                 row.method,
+                row.tagname,
               ]
             );
             insertionPromises.push(insertionPromise);
@@ -208,9 +209,11 @@ app.post("/api/upload-images", upload.single("image"), async (req, res) => {
   );
   console.log(findquery);
   try {
-    const updateQuery =
-      "UPDATE tsetse_fly_data SET images = $1 WHERE TRIM(species) = TRIM($2)";
-
+    const updateQuery = `
+    UPDATE tsetse_fly_data
+    SET images = $1
+    WHERE TRIM(species) = TRIM($2) OR TRIM(tagname) = TRIM($2);
+  `;
     const result = await pool.query(updateQuery, [imageUrl, name]);
 
     if (result.rowCount === 0) {

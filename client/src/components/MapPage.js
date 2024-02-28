@@ -99,7 +99,7 @@ const MapPage = () => {
       <div className="map-page-container">
         <div className="filter-options">
           <div>
-            <label>Filter by:</label>
+            <label>Filters</label>
           </div>
           {Object.keys(selectedFilters).map((filterType) => (
             <div key={filterType} className="filter-group">

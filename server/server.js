@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -12,7 +13,7 @@ const app = express();
 const port = 5000;
 
 const pool = new Pool({
-  user: "postgres",
+  user: process.env.DB_USER,
   host: "localhost",
   database: "tsetse_fly",
   password: "Esther13",

@@ -40,6 +40,7 @@ const MapPage = () => {
     season: [],
     country: [],
     method: [],
+    disease:[],
   });
 
   useEffect(() => {
@@ -145,8 +146,10 @@ const MapPage = () => {
                   <br />
                   Season: {entry.season}
                   <br />
+                  Disease: {entry.disease}
+                  <br />
                   Method: {entry.method}
-                  {entry.species === "unidentified" && (
+                  {entry.species.toLowerCase() === "unidentified" && (
                     <>
                       <br />
                       Tagname: {entry.tagname}

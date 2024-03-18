@@ -245,7 +245,6 @@ app.post("/api/users/edit/:userId", async (req, res) => {
       updateUserQuery += `password = $${updateValues.length}`;
     }
     updateUserQuery += ` WHERE id = ${userId}`;
-    console.log(updateUserQuery);
     await pool.query(updateUserQuery, updateValues);
     res.json({ message: "User updated successfully." });
   } catch (error) {

@@ -48,6 +48,7 @@ function UserEdit() {
             <input
               type="text"
               placeholder="Name"
+              disabled={true}
               value={formData.username || user?.username}
               onChange={(e) =>
                 setFormData({ ...formData, username: e.target.value })

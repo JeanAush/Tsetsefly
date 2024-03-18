@@ -298,16 +298,20 @@ app.get("/api/tsetse_fly_data", async (req, res) => {
   }
 });
 
-// app.get("/api/tsetse_fly_data", async (req, res) => {
-//   try {
-//     const result = await pool.query("SELECT * FROM tsetse_fly_data");
-//     const data = result.rows;
-//     res.json(data);
-//   } catch (error) {
-//     console.error("Error fetching tsetse fly data:", error);
-//     res.sendStatus(500);
-//   }
-// });
+app.get("/api/tsetse_fly_data/:dataId", async (req, res) => {
+  try {
+    const dataId = req.params.dataId;
+    const result = await pool.query(
+      "SELECT * FROM tsetse_fly_data WHERE id = $1",
+      [dataId]
+    );
+    const data = result.rows;
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching tsetse fly data:", error);
+    res.sendStatus(500);
+  }
+});
 
 app.post("/api/tsetse_fly_data/delete", async (req, res) => {
   try {
@@ -321,7 +325,7 @@ app.post("/api/tsetse_fly_data/delete", async (req, res) => {
 });
 
 app.post(
-  "/api/tsetse_fly_data/update/:dataId",
+  "/api/tsetse_fly_data/edit/:dataId",
   upload.single("image"),
   async (req, res) => {
     const { dataId } = req.params;

@@ -1,156 +1,147 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./TsetseEdit.css";
+import React, { useEffect, useState } from "react";
+import { config } from "../config";
+import { useParams } from "react-router-dom";
 
-function TsetseEdit() {
-  const [action, setAction] = useState("Sign Up");
+const TsetseEdit = () => {
+  const [tsetseFlyData, settsetseFlyData] = useState(null);
+  const params = useParams();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `${config.serverUrl}/api/tsetse_fly_data/${params.dataId}`
+        );
+        settsetseFlyData(response.data[0]);
+      } catch (error) {
+        console.error("Error fetching tsetse fly data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (tsetseFlyData) {
+      setFormData({
+        species: tsetseFlyData.species || "",
+        latitude: tsetseFlyData.latitude || "",
+        longitude: tsetseFlyData.longitude || "",
+        monthcaptured: tsetseFlyData.monthcaptured || "",
+        country: tsetseFlyData.country || "",
+        capturemethod: tsetseFlyData.capturemethod || "",
+        tagname: tsetseFlyData.tagname || "",
+        disease: tsetseFlyData.disease || "",
+        image: null, // For image upload
+      });
+    }
+  }, [tsetseFlyData]); // This useEffect depends on tsetseFlyData being set
+
   const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
+    species: "",
+    latitude: "",
+    longitude: "",
+    monthcaptured: "",
+    country: "",
+    capturemethod: "",
+    tagname: "",
+    disease: "",
+    image: null, // For image upload
   });
-  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onUpdate = async (formData) => {
+    // Create an instance of FormData
+    const updateData = new FormData();
 
-    try {
-      if (action === "Sign Up") {
-        await handleSignUp();
-      } else {
-        await handleLogin();
+    // Append each form field to the FormData instance
+    for (const key in formData) {
+      if (key !== "image") {
+        updateData.append(key, formData[key]);
       }
-    } catch (error) {
-      console.error("Error:", error.response.data);
     }
-  };
 
-  const handleSignUp = async () => {
-    try {
-      // Send the formData object in the axios.post request
-      await axios.post("http://localhost:5000/register", formData);
-      handleSuccessfulRegistration();
-    } catch (error) {
-      console.error("Error:", error.response.data);
+    // Append the image file to the FormData, if present
+    if (formData.image) {
+      updateData.append("image", formData.image);
     }
-  };
 
-  const handleLogin = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:5000/login",
-        formData
+      // Make the request to your backend to update the tsetse fly data
+      const response = await fetch(
+        `${config.serverUrl}/api/tsetse_fly_data/edit/${params.dataId}`,
+        {
+          method: "POST",
+          body: updateData,
+          // Do not set 'Content-Type' header when sending FormData
+          // The browser will set it with the proper 'boundary'
+          headers: {
+            // Authorization header if needed, e.g., 'Bearer your_jwt_token_here'
+          },
+        }
       );
-      const token = response.data.token;
-      localStorage.setItem("token", token); // Store token in local storage
-      console.log("Login successful:", token);
-      handleSuccessfulLogin();
-    } catch (error) {
-      if (error.response) {
-        console.error("Error:", error.response.data.message);
-      } else if (error.request) {
-        console.error("Request error:", error.request);
-      } else {
-        console.error("Error:", error.message);
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
       }
+
+      const result = await response.json();
+      console.log(result.message); // Or handle the response as needed
+      // Optionally, invoke a callback or state update to indicate success
+    } catch (error) {
+      console.error("Error updating tsetse fly data:", error);
+      // Handle the error, e.g., by setting an error message in your component's state
     }
   };
 
-  const handleSuccessfulRegistration = () => {
-    // Clear the form data after successful registration
-    setFormData({ username: "", email: "", password: "" });
-
-    // Redirect to the home page
-    navigate("/", { replace: true });
-  };
-
-  const handleSuccessfulLogin = () => {
-    // Clear the form data after successful login
-    setFormData({ username: "", email: "", password: "" });
-
-    // Redirect to the home page
-    navigate("/", { replace: true });
-  };
-
-  const handleActionChange = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setFormData({ username: "", email: "", password: "" });
+    onUpdate(formData);
+  };
 
-    if (action === "Sign Up") {
-      setAction("Login");
-    } else {
-      setAction("Sign Up");
-    }
+  const handleImageChange = (e) => {
+    setFormData({ ...formData, image: e.target.files[0] });
   };
 
   return (
     <div className="form">
       <form onSubmit={handleSubmit}>
         <div className="head">
-          <div className="text">{action}</div>
+          <div className="text">Update Tsetse Fly Data</div>
           <div className="underline"></div>
         </div>
         <div className="inputs">
-          {action === "Login" ? null : (
-            <div className="input">
-              <i className="fa-solid fa-user"></i>
-              <input
-                type="text"
-                placeholder="Name"
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
-              />
-            </div>
-          )}
+          {/* Iterate over each field except the image to create input elements */}
+          {Object.keys(formData)
+            .filter((key) => key !== "image")
+            .map((key) => (
+              <div className="input" key={key}>
+                <i
+                  className={`fa-solid ${
+                    key === "species" ? "fa-bug" : "fa-circle-info"
+                  }`}
+                ></i>
+                <input
+                  type="text"
+                  placeholder={key}
+                  value={formData[key]}
+                  onChange={(e) =>
+                    setFormData({ ...formData, [key]: e.target.value })
+                  }
+                />
+              </div>
+            ))}
           <div className="input">
-            <i className="fa-regular fa-envelope"></i>
-            <input
-              type="email"
-              placeholder="Email@gmail.com"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-            />
-          </div>
-          <div className="input">
-            <i className="fa-solid fa-key"></i>
-            <input
-              type="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-            />
+            <i className="fa-solid fa-image"></i>
+            <input type="file" onChange={handleImageChange} />
           </div>
         </div>
-        {action === "Sign Up" ? null : (
-          <div className="forgot-password">
-            Forgot password? <span>Click here</span>{" "}
-          </div>
-        )}
         <div className="submit-container">
-          <div
-            className={action === "Login" ? "submit gray" : "submit"}
-            onClick={(e) => setAction("Sign Up")}
-          >
-            Sign Up
-          </div>
-          <div
-            className={action === "Sign Up" ? "submit gray" : "submit"}
-            onClick={(e) => setAction("Login")}
-          >
-            Login
-          </div>
           <button type="submit">Submit</button>
         </div>
       </form>
     </div>
   );
-}
+};
 
 export default TsetseEdit;

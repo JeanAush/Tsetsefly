@@ -64,7 +64,7 @@ const Admin = () => {
 
   const deleteTsetseData = async (dataId) => {
     try {
-      await axios.post(`${config.serverUrl}/api/tsetse_fly_data/edit`, {
+      await axios.post(`${config.serverUrl}/api/tsetse_fly_data/delete`, {
         dataId,
       });
       // After deleting the data, fetch updated tsetse fly data

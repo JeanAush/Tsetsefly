@@ -197,6 +197,20 @@ app.get("/api/users", async (req, res) => {
   }
 });
 
+app.get("/api/users/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE id = $1", [
+      userId,
+    ]);
+    const users = result.rows;
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.sendStatus(500);
+  }
+});
+
 app.post("/api/users/delete", async (req, res) => {
   try {
     const { userId } = req.body;
@@ -208,8 +222,9 @@ app.post("/api/users/delete", async (req, res) => {
   }
 });
 
-app.post("/api/users/update", async (req, res) => {
-  const { userId, username, email, password } = req.body;
+app.post("/api/users/edit/:userId", async (req, res) => {
+  const { username, email, password } = req.body;
+  const userId = req.params.userId;
 
   try {
     let updateUserQuery = `UPDATE users SET `;
@@ -229,9 +244,8 @@ app.post("/api/users/update", async (req, res) => {
       updateValues.push(hashedPassword);
       updateUserQuery += `password = $${updateValues.length}`;
     }
-    updateUserQuery += ` WHERE id = $${updateValues.length + 1}`;
-    updateValues.push(userId);
-
+    updateUserQuery += ` WHERE id = ${userId}`;
+    console.log(updateUserQuery);
     await pool.query(updateUserQuery, updateValues);
     res.json({ message: "User updated successfully." });
   } catch (error) {

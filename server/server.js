@@ -229,6 +229,7 @@ app.post("/api/upload-images", upload.single("image"), async (req, res) => {
     res.status(500).json({ message: "Failed to upload image." });
   }
 });
+
 app.get("/api/users", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM users");
@@ -272,68 +273,6 @@ app.delete("/api/tsetse_fly_data/:dataId", async (req, res) => {
     res.sendStatus(500);
   }
 });
-
-// Fetch uploaded images
-// app.get("/api/images", async (req, res) => {
-//   try {
-//     const result = await pool.query("SELECT * FROM insect_images");
-//     const images = result.rows;
-//     res.json(images);
-//   } catch (error) {
-//     console.error(error);
-//     res.sendStatus(500);
-//   }
-// });
-
-// Fetch distinct species
-// app.get("/api/species", async (req, res) => {
-//   try {
-//     const result = await pool.query(
-//       "SELECT DISTINCT species FROM tsetse_fly_data"
-//     );
-//     res.json(result.rows.map((row) => row.species));
-//   } catch (error) {
-//     console.error(error);
-//     res.sendStatus(500);
-//   }
-// });
-
-// // Fetch distinct seasons
-// app.get("/api/season", async (req, res) => {
-//   try {
-//     const result = await pool.query(
-//       "SELECT DISTINCT season FROM tsetse_fly_data"
-//     );
-//     res.json(result.rows.map((row) => row.season));
-//   } catch (error) {
-//     console.error(error);
-//     res.sendStatus(500);
-//   }
-// });
-
-// Fetch distinct trap methods
-// app.get("/api/trap-method", async (req, res) => {
-//   try {
-//     const result = await pool.query(
-//       "SELECT DISTINCT method FROM tsetse_fly_data"
-//     );
-//     res.json(result.rows.map((row) => row.method));
-//   } catch (error) {
-//     console.error(error);
-//     res.sendStatus(500);
-//   }
-// });
-
-// // Fetch distinct countries
-// app.get("/api/country", async (req, res) => {
-//   try {
-//     const result = await pool.query("SELECT * FROM tsetse_fly_data");
-//     res.json(result.rows.map((row) => row));
-//   } catch (error) {
-//     console.error(error);
-//     res.sendStatus(500);
-//   }
-// });
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

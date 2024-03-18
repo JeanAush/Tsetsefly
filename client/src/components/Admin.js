@@ -6,6 +6,10 @@ import { config } from "../config";
 const Admin = () => {
   const [users, setUsers] = useState([]);
   const [tsetseData, setTsetseData] = useState([]);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isTsetseModalOpen, setIsTsetseModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [currentTsetseData, setCurrentTsetseData] = useState(null);
 
   useEffect(() => {
     // Fetch users and tsetse fly data from the backend when the component mounts
@@ -24,7 +28,9 @@ const Admin = () => {
 
   const deleteUser = async (userId) => {
     try {
-      await axios.delete(`/api/users/${userId}`);
+      await axios.post(`${config.serverUrl}/api/users/delete`, {
+        userId,
+      });
       // After deleting the user, fetch updated user data
       fetchUsers();
     } catch (error) {
@@ -33,7 +39,9 @@ const Admin = () => {
   };
   const editUser = async (userId) => {
     try {
-      await axios.edit(`/api/users/${userId}`);
+      await axios.post(`/api/users/edit`, {
+        userId,
+      });
       // After deleting the user, fetch updated user data
       fetchUsers();
     } catch (error) {
@@ -54,7 +62,9 @@ const Admin = () => {
 
   const deleteTsetseData = async (dataId) => {
     try {
-      await axios.delete(`/api/tsetse_fly_data/${dataId}`);
+      await axios.post(`${config.serverUrl}/api/tsetse_fly_data/edit`, {
+        dataId,
+      });
       // After deleting the data, fetch updated tsetse fly data
       fetchTsetseData();
     } catch (error) {
@@ -69,6 +79,26 @@ const Admin = () => {
     } catch (error) {
       console.error("Error editing tsetse fly data:", error);
     }
+  };
+
+  const openUserModal = (user) => {
+    setCurrentUser(user);
+    setIsUserModalOpen(true);
+  };
+
+  const closeUserModal = () => {
+    setIsUserModalOpen(false);
+    setCurrentUser(null);
+  };
+
+  const openTsetseModal = (data) => {
+    setCurrentTsetseData(data);
+    setIsTsetseModalOpen(true);
+  };
+
+  const closeTsetseModal = () => {
+    setIsTsetseModalOpen(false);
+    setCurrentTsetseData(null);
   };
 
   return (
@@ -93,10 +123,10 @@ const Admin = () => {
               <td>{user.password}</td>
               <td>{user.email}</td>
               <td>
-                <button className="button" onClick={() => deleteUser(users.id)}>
+                <button className="button" onClick={() => deleteUser(user.id)}>
                   <i class="fa-solid fa-trash-can"></i>DELETE
                 </button>
-                <button className="button" onClick={() => editUser(users.id)}>
+                <button className="button" onClick={() => editUser(user.id)}>
                   <i class="fa-solid fa-pen-to-square"></i>EDIT
                 </button>
               </td>
@@ -154,6 +184,29 @@ const Admin = () => {
           ))}
         </tbody>
       </table>
+
+      {isUserModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={closeUserModal}>
+              &times;
+            </span>
+            <h2>Edit User</h2>
+            {/* Form to edit user. Use currentUser for initial values */}
+          </div>
+        </div>
+      )}
+      {isTsetseModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={closeTsetseModal}>
+              &times;
+            </span>
+            <h2>Edit Tsetse Fly Data</h2>
+            {/* Form to edit tsetse fly data. Use currentTsetseData for initial values */}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

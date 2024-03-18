@@ -252,9 +252,9 @@ app.get("/api/tsetse_fly_data", async (req, res) => {
   }
 });
 
-app.delete("/api/users/:userId", async (req, res) => {
+app.post("/api/users/delete", async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const { userId } = req.body;
     await pool.query("DELETE FROM users WHERE id = $1", [userId]);
     res.sendStatus(200);
   } catch (error) {
@@ -263,9 +263,9 @@ app.delete("/api/users/:userId", async (req, res) => {
   }
 });
 
-app.delete("/api/tsetse_fly_data/:dataId", async (req, res) => {
+app.post("/api/tsetse_fly_data/edit", async (req, res) => {
   try {
-    const dataId = req.params.dataId;
+    const { dataId } = req.body;
     await pool.query("DELETE FROM tsetse_fly_data WHERE id = $1", [dataId]);
     res.sendStatus(200);
   } catch (error) {

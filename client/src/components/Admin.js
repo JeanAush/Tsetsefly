@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Admin.css";
 import { config } from "../config";
+import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
   const [users, setUsers] = useState([]);
@@ -10,6 +11,7 @@ const Admin = () => {
   const [isTsetseModalOpen, setIsTsetseModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentTsetseData, setCurrentTsetseData] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch users and tsetse fly data from the backend when the component mounts
@@ -37,17 +39,17 @@ const Admin = () => {
       console.error("Error deleting user:", error);
     }
   };
-  const editUser = async (userId) => {
-    try {
-      await axios.post(`/api/users/edit`, {
-        userId,
-      });
-      // After deleting the user, fetch updated user data
-      fetchUsers();
-    } catch (error) {
-      console.error("Error editing user:", error);
-    }
-  };
+  // const editUser = async (userId) => {
+  //   try {
+  //     await axios.post(`/api/users/edit`, {
+  //       userId,
+  //     });
+  //     // After deleting the user, fetch updated user data
+  //     fetchUsers();
+  //   } catch (error) {
+  //     console.error("Error editing user:", error);
+  //   }
+  // };
 
   const fetchTsetseData = async () => {
     try {
@@ -71,15 +73,15 @@ const Admin = () => {
       console.error("Error deleting tsetse fly data:", error);
     }
   };
-  const editTsetseData = async (dataId) => {
-    try {
-      await axios.edit(`/api/tsetse_fly_data/${dataId}`);
-      // After deleting the data, fetch updated tsetse fly data
-      fetchTsetseData();
-    } catch (error) {
-      console.error("Error editing tsetse fly data:", error);
-    }
-  };
+  // const editTsetseData = async (dataId) => {
+  //   try {
+  //     await axios.edit(`/api/tsetse_fly_data/${dataId}`);
+  //     // After deleting the data, fetch updated tsetse fly data
+  //     fetchTsetseData();
+  //   } catch (error) {
+  //     console.error("Error editing tsetse fly data:", error);
+  //   }
+  // };
 
   const openUserModal = (user) => {
     setCurrentUser(user);
@@ -126,7 +128,10 @@ const Admin = () => {
                 <button className="button" onClick={() => deleteUser(user.id)}>
                   <i class="fa-solid fa-trash-can"></i>DELETE
                 </button>
-                <button className="button" onClick={() => editUser(user.id)}>
+                <button
+                  className="button"
+                  onClick={() => navigate(`user/edit/${user.id}`)}
+                >
                   <i class="fa-solid fa-pen-to-square"></i>EDIT
                 </button>
               </td>
@@ -175,7 +180,7 @@ const Admin = () => {
                 </button>
                 <button
                   className="button"
-                  onClick={() => editTsetseData(data.id)}
+                  onClick={() => navigate(`tsetse/edit/${data.id}`)}
                 >
                   <i class="fa-solid fa-pen-to-square"></i>EDIT
                 </button>

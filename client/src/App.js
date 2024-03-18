@@ -9,6 +9,8 @@ import AboutPage from "./components/Aboutpage";
 import RegisterPage from "./components/RegisterPage";
 import LoginSignup from "./components/LoginSignup";
 import Admin from "./components/Admin";
+import TsetseEdit from "./components/TsetseEdit";
+import UserEdit from "./components/UserEdit";
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
           <Route path="MapPage" element={<MapPage />} />
           <Route path="/LoginSignup" element={<LoginSignup />} />
           <Route path="/Admin" element={<Admin />} />
+          <Route path="/Admin/tsetse/edit/:dataId" element={<TsetseEdit />} />
+          <Route path="/Admin/user/edit/:userId" element={<UserEdit />} />
         </Routes>
       </Router>
       {/* <Navbar/> */}

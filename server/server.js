@@ -158,6 +158,88 @@ app.post(
   }
 );
 
+// Upload insect images (up to three)
+// Upload images
+app.post("/api/upload-images", upload.single("image"), async (req, res) => {
+  const { name } = req.body; // The species name
+  const imageUrl = `/uploads/${req.file.filename}`; // Assuming you serve static files and uploads directory is accessible
+  const findquery = await pool.query(
+    `SELECT * FROM tsetse_fly_data WHERE species='${name}'`
+  );
+  console.log(findquery);
+  try {
+    const updateQuery = `
+    UPDATE tsetse_fly_data
+    SET images = $1
+    WHERE TRIM(species) = TRIM($2) OR TRIM(tagname) = TRIM($2);
+  `;
+    const result = await pool.query(updateQuery, [imageUrl, name]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Species not found." });
+    }
+
+    res.json({ message: "Image uploaded and updated successfully!" });
+  } catch (error) {
+    console.error("Database or file error:", error);
+    res.status(500).json({ message: "Failed to upload image." });
+  }
+});
+
+app.get("/api/users", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM users");
+    const users = result.rows;
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.sendStatus(500);
+  }
+});
+
+app.post("/api/users/delete", async (req, res) => {
+  try {
+    const { userId } = req.body;
+    await pool.query("DELETE FROM users WHERE id = $1", [userId]);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.sendStatus(500);
+  }
+});
+
+app.post("/api/users/update", async (req, res) => {
+  const { userId, username, email, password } = req.body;
+
+  try {
+    let updateUserQuery = `UPDATE users SET `;
+    const updateValues = [];
+    if (username) {
+      updateValues.push(username);
+      updateUserQuery += `username = $${updateValues.length}`;
+    }
+    if (email) {
+      if (updateValues.length > 0) updateUserQuery += ", ";
+      updateValues.push(email);
+      updateUserQuery += `email = $${updateValues.length}`;
+    }
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      if (updateValues.length > 0) updateUserQuery += ", ";
+      updateValues.push(hashedPassword);
+      updateUserQuery += `password = $${updateValues.length}`;
+    }
+    updateUserQuery += ` WHERE id = $${updateValues.length + 1}`;
+    updateValues.push(userId);
+
+    await pool.query(updateUserQuery, updateValues);
+    res.json({ message: "User updated successfully." });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.sendStatus(500);
+  }
+});
+
 // Fetch tsetse fly data based on filters
 app.get("/api/tsetse_fly_data", async (req, res) => {
   const { country, species, monthCaptured, captureMethod, disease } = req.query;
@@ -202,68 +284,19 @@ app.get("/api/tsetse_fly_data", async (req, res) => {
     res.status(500).send("Error fetching data");
   }
 });
-// Upload insect images (up to three)
-// Upload images
-app.post("/api/upload-images", upload.single("image"), async (req, res) => {
-  const { name } = req.body; // The species name
-  const imageUrl = `/uploads/${req.file.filename}`; // Assuming you serve static files and uploads directory is accessible
-  const findquery = await pool.query(
-    `SELECT * FROM tsetse_fly_data WHERE species='${name}'`
-  );
-  console.log(findquery);
-  try {
-    const updateQuery = `
-    UPDATE tsetse_fly_data
-    SET images = $1
-    WHERE TRIM(species) = TRIM($2) OR TRIM(tagname) = TRIM($2);
-  `;
-    const result = await pool.query(updateQuery, [imageUrl, name]);
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ message: "Species not found." });
-    }
+// app.get("/api/tsetse_fly_data", async (req, res) => {
+//   try {
+//     const result = await pool.query("SELECT * FROM tsetse_fly_data");
+//     const data = result.rows;
+//     res.json(data);
+//   } catch (error) {
+//     console.error("Error fetching tsetse fly data:", error);
+//     res.sendStatus(500);
+//   }
+// });
 
-    res.json({ message: "Image uploaded and updated successfully!" });
-  } catch (error) {
-    console.error("Database or file error:", error);
-    res.status(500).json({ message: "Failed to upload image." });
-  }
-});
-
-app.get("/api/users", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT * FROM users");
-    const users = result.rows;
-    res.json(users);
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res.sendStatus(500);
-  }
-});
-
-app.get("/api/tsetse_fly_data", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT * FROM tsetse_fly_data");
-    const data = result.rows;
-    res.json(data);
-  } catch (error) {
-    console.error("Error fetching tsetse fly data:", error);
-    res.sendStatus(500);
-  }
-});
-
-app.post("/api/users/delete", async (req, res) => {
-  try {
-    const { userId } = req.body;
-    await pool.query("DELETE FROM users WHERE id = $1", [userId]);
-    res.sendStatus(200);
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    res.sendStatus(500);
-  }
-});
-
-app.post("/api/tsetse_fly_data/edit", async (req, res) => {
+app.post("/api/tsetse_fly_data/delete", async (req, res) => {
   try {
     const { dataId } = req.body;
     await pool.query("DELETE FROM tsetse_fly_data WHERE id = $1", [dataId]);
@@ -273,6 +306,72 @@ app.post("/api/tsetse_fly_data/edit", async (req, res) => {
     res.sendStatus(500);
   }
 });
+
+app.post(
+  "/api/tsetse_fly_data/update/:dataId",
+  upload.single("image"),
+  async (req, res) => {
+    const { dataId } = req.params;
+    const {
+      username,
+      species,
+      latitude,
+      longitude,
+      monthCaptured,
+      country,
+      captureMethod,
+      tagname,
+      disease,
+    } = req.body;
+    let imageUrl = undefined;
+
+    // Check if an image was uploaded and set the new image URL
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`;
+    }
+
+    try {
+      let updateDataQuery = `UPDATE tsetse_fly_data SET `;
+      const updateValues = [];
+      const fieldsToUpdate = {
+        username,
+        species,
+        latitude,
+        longitude,
+        monthCaptured,
+        country,
+        captureMethod,
+        tagname,
+        disease,
+        images: imageUrl,
+      };
+
+      Object.entries(fieldsToUpdate).forEach(([key, value], index) => {
+        // Skip if value is not provided (undefined)
+        if (value !== undefined) {
+          if (updateValues.length > 0) updateDataQuery += ", ";
+          updateValues.push(value);
+          updateDataQuery += `${key} = $${updateValues.length}`;
+        }
+      });
+
+      if (updateValues.length === 0) {
+        return res
+          .status(400)
+          .json({ message: "No fields or image provided for update." });
+      }
+
+      updateDataQuery += ` WHERE id = $${updateValues.length + 1}`;
+      updateValues.push(dataId);
+
+      await pool.query(updateDataQuery, updateValues);
+      res.json({ message: "Tsetse fly data updated successfully." });
+    } catch (error) {
+      console.error("Error updating tsetse fly data:", error);
+      res.status(500).json({ error: "Failed to update tsetse fly data." });
+    }
+  }
+);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

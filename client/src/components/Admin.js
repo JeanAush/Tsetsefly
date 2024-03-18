@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Admin.css";
+import { config } from "../config";
 
 const Admin = () => {
   const [users, setUsers] = useState([]);
@@ -14,19 +15,10 @@ const Admin = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("/api/users");
+      const response = await axios.get(`${config.serverUrl}/api/users`);
       setUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
-    }
-  };
-
-  const fetchTsetseData = async () => {
-    try {
-      const response = await axios.get("/api/tsetse_fly_data");
-      setTsetseData(response.data);
-    } catch (error) {
-      console.error("Error fetching tsetse fly data:", error);
     }
   };
 
@@ -46,6 +38,17 @@ const Admin = () => {
       fetchUsers();
     } catch (error) {
       console.error("Error editing user:", error);
+    }
+  };
+
+  const fetchTsetseData = async () => {
+    try {
+      const response = await axios.get(
+        `${config.serverUrl}/api/tsetse_fly_data`
+      );
+      setTsetseData(response.data);
+    } catch (error) {
+      console.error("Error fetching tsetse fly data:", error);
     }
   };
 

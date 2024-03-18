@@ -24,13 +24,6 @@ export const MenuItems =[
         icon : "fa-solid fa-earth-africa"
     },
     {
-        title: "Data",
-        url: "dataPage",
-        cName: "nav-links",
-        icon: "fa-solid fa-magnifying-glass-chart"
-
-    },
-    {
         title :"Login",
         url : "/loginSignup",
         cName : "nav-links-mobile",

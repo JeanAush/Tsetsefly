@@ -9,6 +9,7 @@ import Footer from "./Footer";
 import "leaflet/dist/leaflet.css";
 import "./MapPage.css";
 import { Image, CSVUpload } from "./FileUpload";
+
 const createColoredMarkerIcon = (color) => {
   const markerHtml = encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" height="50" width="50"><circle cx="50" cy="50" r="40" fill="${color}" /></svg>`
@@ -23,24 +24,29 @@ const createColoredMarkerIcon = (color) => {
   });
 };
 
-const getRandomColor = () => {
-  const letters = "0123456789ABCDEF";
+const stringToColor = (str) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
   let color = "#";
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xff;
+    color += ("00" + value.toString(16)).substr(-2);
   }
   return color;
 };
 
 const MapPage = () => {
   const [data, setData] = useState([]);
+  const [speciesColors, setSpeciesColors] = useState({});
   // Initializing all selected filters as empty arrays
   const [selectedFilters, setSelectedFilters] = useState({
     species: [],
-    season: [],
+    monthcaptured: [],
     country: [],
-    method: [],
-    disease:[],
+    capturemethod: [],
+    disease: [],
   });
 
   useEffect(() => {
@@ -50,6 +56,15 @@ const MapPage = () => {
           "http://localhost:5000/api/tsetse_fly_data"
         );
         setData(response.data);
+
+        const uniqueSpecies = [
+          ...new Set(response.data.map((item) => item.species)),
+        ];
+        const colors = {};
+        uniqueSpecies.forEach((species) => {
+          colors[species] = stringToColor(species);
+        });
+        setSpeciesColors(colors);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -72,8 +87,10 @@ const MapPage = () => {
 
   const FilterCheckbox = ({ filterType, option }) => (
     <label key={option} className="filter-container">
-      <p className="filter-label">{option}</p>
-      <div className="filter-checkbox">
+      <div className="filter-label-container">
+        <p className="filter-label">{option}</p>
+      </div>
+      <div className="filter-checkbox-container">
         <input
           type="checkbox"
           value={option}
@@ -96,24 +113,26 @@ const MapPage = () => {
   return (
     <div>
       <Navbar />
-      <Hero cName="hero-mid" heroImg={AboutImg} title=" Map Page" />
+      <Hero cName="hero-mid" heroImg={AboutImg} title="Map Page" />
       <div className="map-page-container">
         <div className="filter-options">
-          <div>
-            <label>Filters</label>
-          </div>
+          <label>
+            <b>FILTERS</b>
+          </label>
           {Object.keys(selectedFilters).map((filterType) => (
             <div key={filterType} className="filter-group">
-              <p className="filter-label">
+              <p className="filter-section-label">
                 {filterType.charAt(0).toUpperCase() + filterType.slice(1)}:
               </p>
-              {extractUniqueOptions(filterType).map((option) => (
-                <FilterCheckbox
-                  key={option}
-                  filterType={filterType}
-                  option={option}
-                />
-              ))}
+              <div className="filter-parent">
+                {extractUniqueOptions(filterType).map((option) => (
+                  <FilterCheckbox
+                    key={option}
+                    filterType={filterType}
+                    option={option}
+                  />
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -131,7 +150,7 @@ const MapPage = () => {
               <Marker
                 key={entry.id}
                 position={[entry.latitude, entry.longitude]}
-                icon={createColoredMarkerIcon(getRandomColor())}
+                icon={createColoredMarkerIcon(speciesColors[entry.species])}
               >
                 <Popup>
                   <img
@@ -144,11 +163,11 @@ const MapPage = () => {
                   <br />
                   Country: {entry.country}
                   <br />
-                  Season: {entry.season}
+                  Month Captured: {entry.monthcaptured}
                   <br />
                   Disease: {entry.disease}
                   <br />
-                  Method: {entry.method}
+                  Capture Method: {entry.capturemethod}
                   {entry.species.toLowerCase() === "unidentified" && (
                     <>
                       <br />

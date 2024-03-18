@@ -127,16 +127,17 @@ app.post(
           .on("data", async (row) => {
             // Insert data into PostgreSQL database
             const insertionPromise = pool.query(
-              "INSERT INTO tsetse_fly_data (username, species, latitude, longitude, season, country, method, tagname) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+              "INSERT INTO tsetse_fly_data (username, species, latitude, longitude, monthCaptured, country, CaptureMethod, tagname,  disease) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
               [
                 username,
                 row.species,
                 row.latitude,
                 row.longitude,
-                row.season,
+                row.monthCaptured,
                 row.country,
-                row.method,
+                row.captureMethod,
                 row.tagname,
+                row.disease,
               ]
             );
             insertionPromises.push(insertionPromise);
@@ -159,7 +160,7 @@ app.post(
 
 // Fetch tsetse fly data based on filters
 app.get("/api/tsetse_fly_data", async (req, res) => {
-  const { country, species, season, method } = req.query;
+  const { country, species, monthCaptured, captureMethod, disease } = req.query;
 
   let queryParts = {
     text: "SELECT * FROM tsetse_fly_data",
@@ -184,8 +185,9 @@ app.get("/api/tsetse_fly_data", async (req, res) => {
   // Add conditions for all parameters
   addCondition(country, "country");
   addCondition(species, "species");
-  addCondition(season, "season");
-  addCondition(method, "method");
+  addCondition(monthCaptured, "monthCaptured");
+  addCondition(captureMethod, "captureMethod");
+  addCondition(disease, "disease");
 
   // If there are any conditions, add them to the query
   if (queryParts.conditions.length > 0) {
@@ -225,6 +227,49 @@ app.post("/api/upload-images", upload.single("image"), async (req, res) => {
   } catch (error) {
     console.error("Database or file error:", error);
     res.status(500).json({ message: "Failed to upload image." });
+  }
+});
+app.get("/api/users", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM users");
+    const users = result.rows;
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.sendStatus(500);
+  }
+});
+
+app.get("/api/tsetse_fly_data", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM tsetse_fly_data");
+    const data = result.rows;
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching tsetse fly data:", error);
+    res.sendStatus(500);
+  }
+});
+
+app.delete("/api/users/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    await pool.query("DELETE FROM users WHERE id = $1", [userId]);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.sendStatus(500);
+  }
+});
+
+app.delete("/api/tsetse_fly_data/:dataId", async (req, res) => {
+  try {
+    const dataId = req.params.dataId;
+    await pool.query("DELETE FROM tsetse_fly_data WHERE id = $1", [dataId]);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Error deleting tsetse fly data:", error);
+    res.sendStatus(500);
   }
 });
 

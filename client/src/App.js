@@ -8,6 +8,7 @@ import HelpPage from "./components/HelpPage";
 import AboutPage from "./components/Aboutpage";
 import RegisterPage from "./components/RegisterPage";
 import LoginSignup from "./components/LoginSignup";
+import Admin from "./components/Admin";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/HelpPage" element={<HelpPage />} />
           <Route path="MapPage" element={<MapPage />} />
           <Route path="/LoginSignup" element={<LoginSignup />} />
+          <Route path="/Admin" element={<Admin />} />
         </Routes>
       </Router>
       {/* <Navbar/> */}

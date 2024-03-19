@@ -10,7 +10,7 @@ const csvParser = require("csv-parser");
 const fs = require("fs");
 
 const app = express();
-const port = 5000;
+const port = 6000;
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -75,6 +75,23 @@ app.post("/register", async (req, res) => {
     await pool.query(
       "INSERT INTO users (username, email, password) VALUES ($1, $2, $3)",
       [username, email, hashedPassword]
+    );
+
+    res.sendStatus(201);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+app.post("/admin/register", async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await pool.query(
+      "INSERT INTO users (username, email, password, isAdmin) VALUES ($1, $2, $3, $4)",
+      [username, email, hashedPassword, true]
     );
 
     res.sendStatus(201);

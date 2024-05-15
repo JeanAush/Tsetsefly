@@ -3,6 +3,7 @@ import axios from "axios";
 import "./Admin.css";
 import { config } from "../config";
 import { useNavigate } from "react-router-dom";
+import AdminNav from "./AdminNav";
 
 const Admin = () => {
   const [users, setUsers] = useState([]);
@@ -105,6 +106,7 @@ const Admin = () => {
 
   return (
     <div>
+      <AdminNav />
       <h2>Admin Panel</h2>
       <h3>Users</h3>
       <table>

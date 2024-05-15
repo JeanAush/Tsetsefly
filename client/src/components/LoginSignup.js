@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 import "./LoginSignup.css";
 
 function LoginSignup() {
@@ -38,7 +38,10 @@ function LoginSignup() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/login", formData);
+      const response = await axios.post(
+        "http://localhost:5000/login",
+        formData
+      );
       const token = response.data.token;
       localStorage.setItem("token", token); // Store token in local storage
       console.log("Login successful:", token);
@@ -53,7 +56,6 @@ function LoginSignup() {
       }
     }
   };
-  
 
   const handleSuccessfulRegistration = () => {
     // Clear the form data after successful registration
@@ -83,32 +85,70 @@ function LoginSignup() {
   };
 
   return (
-    <div className='form'>
+    <div className="form">
       <form onSubmit={handleSubmit}>
-        <div className='head'>
-          <div className='text'>{action}</div>
-          <div className='underline'></div>
+        <div className="head">
+          <div className="text">{action}</div>
+          <div className="underline"></div>
         </div>
-        <div className='inputs'>
+        <div className="inputs">
           {action === "Login" ? null : (
-            <div className='input'>
+            <div className="input">
               <i className="fa-solid fa-user"></i>
-              <input type='text' placeholder='Name' value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} />
+              <input
+                type="text"
+                placeholder="Name"
+                value={formData.username}
+                onChange={(e) =>
+                  setFormData({ ...formData, username: e.target.value })
+                }
+              />
             </div>
           )}
-          <div className='input'>
+          <div className="input">
             <i className="fa-regular fa-envelope"></i>
-            <input type='email' placeholder='Email@gmail.com' value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+            <input
+              type="email"
+              placeholder="Email@gmail.com"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+            />
           </div>
-          <div className='input'>
+          <div className="input">
             <i className="fa-solid fa-key"></i>
-            <input type='password' placeholder='Password' value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
+            <input
+              type="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+            />
           </div>
         </div>
-        {action === "Sign Up" ? null : <div className='forgot-password'>Forgot password? <span>Click here</span> </div>}
-        <div className='submit-container'>
-          <div className={action === "Login" ? "submit gray" : "submit"} onClick={(e) => setAction("Sign Up")}>Sign Up</div>
-          <div className={action === "Sign Up" ? "submit gray" : "submit"} onClick={(e) => setAction("Login")}>Login</div>
+        {action === "Sign Up" ? null : (
+          <div className="forgot-password">
+            Forgot password? <span>Click here</span>{" "}
+          </div>
+        )}
+        {/* <div className="forgot-password">
+          Are you an Admin? <span>Click here</span>{" "}
+        </div> */}
+        <div className="submit-container">
+          <div
+            className={action === "Login" ? "submit gray" : "submit"}
+            onClick={(e) => setAction("Sign Up")}
+          >
+            Sign Up
+          </div>
+          <div
+            className={action === "Sign Up" ? "submit gray" : "submit"}
+            onClick={(e) => setAction("Login")}
+          >
+            Login
+          </div>
           <button type="submit">Submit</button>
         </div>
       </form>

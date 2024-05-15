@@ -11,6 +11,7 @@ import LoginSignup from "./components/LoginSignup";
 import Admin from "./components/Admin";
 import TsetseEdit from "./components/TsetseEdit";
 import UserEdit from "./components/UserEdit";
+import AdminLogin from "./components/AdminLogin";
 
 function App() {
   return (
@@ -25,6 +26,8 @@ function App() {
           <Route path="/Admin" element={<Admin />} />
           <Route path="/Admin/tsetse/edit/:dataId" element={<TsetseEdit />} />
           <Route path="/Admin/user/edit/:userId" element={<UserEdit />} />
+          <Route path="*" element={<div>page not found!</div>} />
+          <Route path="/AdminLogin" element={<AdminLogin />} />
         </Routes>
       </Router>
       {/* <Navbar/> */}

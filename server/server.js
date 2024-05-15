@@ -10,7 +10,7 @@ const csvParser = require("csv-parser");
 const fs = require("fs");
 
 const app = express();
-const port = 6000;
+const port = 5000;
 
 const pool = new Pool({
   user: process.env.DB_USER,
